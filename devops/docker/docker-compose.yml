@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  jupyter:
+    hostname: 'jupyter.local'
+    image: jupyter/datascience-notebook
+    restart: always
+    #command: [start-notebook.sh, --NotebookApp.token='supersecrettokencode']
+    volumes:
+      - ../../data:/home/jovyan/work:delegated
+    ports:
+      - "8888:8888"
+    environment:
+      VIRTUAL_HOST: 'jupyter.local'
+    networks:
+      - default
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: docker-jupyter-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - '/var/run/docker.sock:/tmp/docker.sock:ro'
+      - './proxy/nginx/unrestricted_client_body_size.conf:/etc/nginx/conf.d/unrestricted_client_body_size.conf'
+
+networks:
+  default:
+    name: docker-jupyter-proxy-net
